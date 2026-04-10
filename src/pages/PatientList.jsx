@@ -10,17 +10,25 @@ import {
   Paper,
   CircularProgress,
   Grid,
+  Card,
+  CardContent,
   Button,
   Chip,
-  Divider
+  Tooltip,
+  Grow,
+  Divider,
+  Stack
 } from '@mui/material';
 import { 
-  ArrowBack as ArrowBackIcon, 
-  Search as SearchIcon, 
-  Add as AddIcon,
-  DeleteOutline as DeleteIcon,
+  ArrowBack, 
+  Search, 
+  Add,
+  Delete,
   FilterList,
-  MoreVert
+  History,
+  Person,
+  ChevronRight,
+  Badge
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import patientService from '../services/patientService';
@@ -30,7 +38,6 @@ const PatientList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchPatients = async () => {
@@ -38,8 +45,7 @@ const PatientList = () => {
         const data = await patientService.getPatients();
         setPatients(data);
       } catch (err) {
-        setError('Failed to fetch patients');
-        console.error(err);
+        console.error("Failed to fetch patients:", err);
       } finally {
         setLoading(false);
       }
@@ -47,135 +53,190 @@ const PatientList = () => {
     fetchPatients();
   }, []);
 
+  const handleDelete = async (e, id) => {
+    e.stopPropagation();
+    if (window.confirm("Are you sure you want to delete this patient record?")) {
+      try {
+        await patientService.deletePatient(id);
+        setPatients(patients.filter(p => (p.id !== id && p.patient_id !== id)));
+      } catch (err) {
+        alert("Failed to delete patient");
+      }
+    }
+  };
+
   const filteredPatients = patients.filter(patient => 
-    patient.name.toLowerCase().includes(searchQuery.toLowerCase())
+    patient.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    patient.patient_id?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
-    <Box sx={{ pb: 8 }}>
-      {/* Search and Filters */}
-      <Box sx={{ mb: 4, display: 'flex', gap: 2, alignItems: 'center' }}>
-        <TextField
-          placeholder="Search by name or ID..."
-          size="small"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          sx={{ 
-            flexGrow: 1, 
-            '& .MuiOutlinedInput-root': {
-              borderRadius: '12px',
-              bgcolor: 'white',
-              height: 48,
-              '& fieldset': { borderColor: '#edf2f7' },
-              '&:hover fieldset': { borderColor: '#e2e8f0' },
-            }
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon sx={{ color: '#a0aec0' }} />
-              </InputAdornment>
-            ),
-          }}
-        />
-        <Button 
-          variant="outlined" 
-          startIcon={<FilterList />}
-          sx={{ 
-            borderRadius: '12px', 
-            height: 48, 
-            color: '#4a5568', 
-            borderColor: '#edf2f7',
-            bgcolor: 'white',
-            textTransform: 'none',
-            fontSize: '0.9rem'
-          }}
-        >
-          Filters
-        </Button>
+    <Box sx={{ maxWidth: 900, mx: 'auto', pb: 12 }}>
+      {/* Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 6 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <IconButton onClick={() => navigate('/dashboard')} sx={{ color: '#0f172a', bgcolor: 'white', '&:hover': { bgcolor: '#f1f5f9' }, border: '1px solid #e2e8f0' }}>
+            <ArrowBack />
+          </IconButton>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 900, color: '#0f172a', letterSpacing: -1 }}>
+              Patient Database
+            </Typography>
+            <Typography variant="subtitle2" sx={{ color: '#64748b', fontWeight: 700 }}>
+              {filteredPatients.length} professional records active
+            </Typography>
+          </Box>
+        </Box>
+        
+        <Box sx={{ display: 'flex', gap: 2 }}>
+            <TextField
+              placeholder="Filter by name or ID..."
+              size="small"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              sx={{ 
+                width: 300,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '16px',
+                  bgcolor: 'white',
+                  height: 48,
+                  '& fieldset': { borderColor: '#e2e8f0' },
+                  '&:hover fieldset': { borderColor: '#2563eb' },
+                }
+              }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search sx={{ color: '#94a3b8' }} />
+                  </InputAdornment>
+                ),
+              }}
+            />
+        </Box>
       </Box>
 
-      {/* Patient Grid */}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-          <CircularProgress sx={{ color: '#0066ff' }} />
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 10 }}>
+          <CircularProgress sx={{ color: '#2563eb' }} />
         </Box>
-      ) : error ? (
-        <Paper sx={{ p: 4, textAlign: 'center', borderRadius: '20px', bgcolor: '#fff5f5' }}>
-          <Typography color="error" variant="body1" sx={{ fontWeight: 600 }}>{error}</Typography>
-          <Button sx={{ mt: 2 }} onClick={() => window.location.reload()}>Retry</Button>
-        </Paper>
       ) : (
-        <Grid container spacing={3}>
-          {filteredPatients.map((patient) => (
-            <Grid item xs={12} sm={6} lg={4} key={patient.id || patient.patient_id}>
-              <Paper 
-                onClick={() => navigate(`/patient/${patient.id}`)}
-                sx={{ 
-                  p: 2.5, 
-                  borderRadius: '20px', 
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  position: 'relative',
-                  '&:hover': { transform: 'translateY(-4px)', boxShadow: '0 10px 25px rgba(0,0,0,0.05)' }
-                }}
-              >
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                  <Avatar 
-                    sx={{ 
-                      width: 50, 
-                      height: 50, 
-                      bgcolor: '#ebf4ff', 
-                      color: '#3182ce', 
-                      fontWeight: 700,
-                      fontSize: '1.2rem'
-                    }}
-                  >
-                    {patient.name?.charAt(0) || 'P'}
-                  </Avatar>
-                  <IconButton size="small" sx={{ color: '#a0aec0' }}>
-                    <MoreVert />
-                  </IconButton>
-                </Box>
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 800, color: '#1a202c', mb: 0.5 }}>
-                    {patient.name}
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#a0aec0', fontWeight: 600, display: 'block' }}>
-                    PATIENT ID: {patient.patient_id || patient.id}
-                  </Typography>
-                </Box>
-                <Divider sx={{ mb: 2, opacity: 0.5 }} />
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Chip 
-                    label="Stable" 
-                    size="small" 
-                    sx={{ bgcolor: '#f0fff4', color: '#38a169', fontWeight: 700, fontSize: '0.7rem' }} 
-                  />
-                  <Typography variant="caption" sx={{ color: '#a0aec0', fontWeight: 600 }}>
-                    Last Scan: 2h ago
-                  </Typography>
-                </Box>
-              </Paper>
+        <Box>
+          {filteredPatients.length === 0 ? (
+            <Paper sx={{ p: 10, textAlign: 'center', borderRadius: '32px', bgcolor: 'rgba(255,255,255,0.4)', border: '1px dashed #cbd5e1' }}>
+              <Person sx={{ fontSize: 60, color: '#94a3b8', mb: 2 }} />
+              <Typography sx={{ color: '#64748b', fontWeight: 800 }}>No patient records matching your search.</Typography>
+            </Paper>
+          ) : (
+            <Grid container spacing={3}>
+              {filteredPatients.map((patient, index) => (
+                <Grid item xs={12} sm={6} md={4} key={patient.id || patient.patient_id}>
+                  <Grow in={true} timeout={(index + 1) * 100}>
+                    <Card 
+                      onClick={() => navigate(`/patient/${patient.id || patient.patient_id}`)}
+                      sx={{ 
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        cursor: 'pointer',
+                        borderRadius: '24px',
+                        bgcolor: 'rgba(255, 255, 255, 0.4)',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(226, 232, 240, 0.5)',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        '&:hover': { 
+                          transform: 'translateY(-8px)', 
+                          bgcolor: 'rgba(255,255,255,0.9)',
+                          boxShadow: '0 20px 40px rgba(15, 23, 42, 0.1)',
+                          borderColor: '#2563eb'
+                        }
+                      }}
+                    >
+                      <CardContent sx={{ p: 3, flexGrow: 1, textAlign: 'center' }}>
+                        <Box sx={{ position: 'relative', mb: 2, display: 'inline-block' }}>
+                          <Avatar 
+                            sx={{ 
+                              width: 80, 
+                              height: 80, 
+                              mx: 'auto',
+                              bgcolor: '#f1f5f9', 
+                              color: '#2563eb', 
+                              fontSize: '2rem', 
+                              fontWeight: 900,
+                              border: '2px solid #e2e8f0'
+                            }}
+                          >
+                            {patient.name?.charAt(0) || 'P'}
+                          </Avatar>
+                          <IconButton 
+                            onClick={(e) => handleDelete(e, patient.id || patient.patient_id)}
+                            sx={{ 
+                              position: 'absolute', 
+                              top: -5, 
+                              right: -5, 
+                              bgcolor: 'white', 
+                              color: '#D32F2F', 
+                              boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                              '&:hover': { bgcolor: '#fee2e2' },
+                              width: 32,
+                              height: 32
+                            }}
+                          >
+                            <Delete sx={{ fontSize: 18 }} />
+                          </IconButton>
+                        </Box>
+                        
+                        <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', mb: 0.5, lineHeight: 1.2 }}>
+                          {patient.name}
+                        </Typography>
+                        
+                        <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 600, mb: 2 }}>
+                          ID: {patient.patient_id || patient.id}
+                        </Typography>
+                        
+                        <Divider sx={{ mb: 2, opacity: 0.5 }} />
+                        
+                        <Button 
+                          fullWidth
+                          variant="contained"
+                          disableElevation
+                          sx={{ 
+                            borderRadius: '12px',
+                            bgcolor: '#f1f5f9',
+                            color: '#2563eb',
+                            fontWeight: 700,
+                            '&:hover': { bgcolor: '#e2e8f0' },
+                            textTransform: 'none'
+                          }}
+                        >
+                          View Details
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </Grow>
+                </Grid>
+              ))}
             </Grid>
-          ))}
-        </Grid>
+          )}
+        </Box>
       )}
 
-      {/* FAB */}
+      {/* FAB for Adding Patient */}
       <Fab 
         onClick={() => navigate('/register-patient')}
         sx={{ 
           position: 'fixed', 
-          bottom: 32, 
-          right: 32, 
-          bgcolor: '#0066ff',
+          bottom: 40, 
+          right: 40, 
+          bgcolor: '#2563eb',
           color: 'white',
-          '&:hover': { bgcolor: '#0052cc' },
-          boxShadow: '0 8px 16px rgba(0, 102, 255, 0.3)'
+          width: 64,
+          height: 64,
+          '&:hover': { bgcolor: '#1d4ed8', transform: 'scale(1.05)' },
+          boxShadow: '0 10px 30px rgba(37, 99, 235, 0.3)',
+          transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
         }} 
       >
-        <AddIcon />
+        <Add sx={{ fontSize: 32 }} />
       </Fab>
     </Box>
   );

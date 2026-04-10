@@ -13,16 +13,15 @@ import {
 import {
   Dashboard as DashboardIcon,
   MonitorHeart,
-  Analytics,
   People,
   Notifications,
   Psychology,
   Logout,
   LocalHospital,
   Timeline,
-  History,
   PersonAdd,
-  NotificationsActive
+  NotificationsActive,
+  TrendingUp
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import authService from '../services/authService';
@@ -60,49 +59,51 @@ const Sidebar = () => {
   };
 
   const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard', category: 'MAIN' },
-    { text: 'Live Monitor', icon: <MonitorHeart />, path: '/real-time', category: 'MAIN' },
-    { text: 'ICU Monitoring', icon: <LocalHospital />, path: '/dose-stats', category: 'MAIN' },
-    { text: 'Analytics', icon: <Timeline />, path: '/ai-risk', category: 'MAIN' },
-    
-    { text: 'Patient List', icon: <People />, path: '/patients', category: 'PATIENTS' },
-    { text: 'Patient Summary', icon: <History />, path: '/patient/1', category: 'PATIENTS' },
-    { text: 'Add Patient', icon: <PersonAdd />, path: '/register-patient', category: 'PATIENTS' },
-    
-    { text: 'Alerts Overview', icon: <Notifications />, path: '/system-logs', category: 'ALERTS' },
-    { text: 'Active Alerts', icon: <NotificationsActive />, path: '/system-logs', category: 'ALERTS' },
-    { text: 'Notifications', icon: <Notifications />, path: '/system-logs', category: 'ALERTS' },
-    
-    { text: 'AI Assistant', icon: <Psychology />, path: '/detect-anomalies', category: 'AI FEATURES' },
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard', category: 'MAIN NAVIGATION' },
+    { text: 'Patients', icon: <People />, path: '/patients', category: 'MAIN NAVIGATION' },
+    { text: 'Scans', icon: <MonitorHeart />, path: '/real-time', category: 'MAIN NAVIGATION' },
+    { text: 'Alerts', icon: <NotificationsActive />, path: '/system-logs', category: 'MAIN NAVIGATION' },
+    { text: 'Admin', icon: <LocalHospital />, path: '/admin', category: 'MAIN NAVIGATION' },
+    { text: 'AI Analytics', icon: <Psychology />, path: '/ai-risk', category: 'MAIN NAVIGATION' },
   ];
 
-  const categories = ['MAIN', 'PATIENTS', 'ALERTS', 'AI FEATURES'];
+  const categories = ['MAIN NAVIGATION'];
 
   return (
     <Box sx={{ 
       width: 260, 
       height: '100vh', 
-      bgcolor: 'white', 
-      borderRight: '1px solid #edf2f7',
+      bgcolor: 'rgba(255, 255, 255, 0.95)', 
+      backdropFilter: 'blur(24px)',
+      borderRight: '1px solid #e2e8f0',
       display: 'flex',
       flexDirection: 'column',
       position: 'fixed',
-      zIndex: 1200
+      zIndex: 1200,
+      color: '#1e293b',
+      boxShadow: '10px 0 30px rgba(0,0,0,0.02)'
     }}>
       <Box 
         onClick={() => navigate('/dashboard')}
-        sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer', '&:hover': { opacity: 0.8 } }}
+        sx={{ p: 3, mb: 1, display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer' }}
       >
-        <MonitorHeart sx={{ color: '#0066ff', fontSize: 28 }} />
-        <Typography variant="h6" sx={{ fontWeight: 800, color: '#1a202c', letterSpacing: -0.5, fontSize: '1.25rem' }}>
-          VentGuard
+        <Box sx={{ 
+          p: 1, 
+          borderRadius: '12px', 
+          bgcolor: 'rgba(37, 99, 235, 0.08)',
+          border: '1px solid rgba(37, 99, 235, 0.1)'
+        }}>
+          <MonitorHeart sx={{ color: '#2563eb', fontSize: 24 }} />
+        </Box>
+        <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', letterSpacing: -0.5 }}>
+          CT DOSE
         </Typography>
       </Box>
 
-      <Box sx={{ flexGrow: 1, overflowY: 'auto', px: 2, mt: 1 }}>
+      <Box sx={{ flexGrow: 1, overflowY: 'auto', px: 2 }}>
         {categories.map((cat) => (
           <Box key={cat} sx={{ mb: 3 }}>
-            <Typography variant="caption" sx={{ color: '#a0aec0', fontWeight: 700, ml: 2, mb: 1, display: 'block', letterSpacing: 1 }}>
+            <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800, ml: 2, mb: 1.5, display: 'block', letterSpacing: 1.5 }}>
               {cat}
             </Typography>
             <List disablePadding>
@@ -114,12 +115,15 @@ const Sidebar = () => {
                     key={item.text}
                     onClick={() => navigate(item.path)}
                     sx={{ 
-                      borderRadius: '12px',
-                      mb: 0.5,
-                      bgcolor: isActive ? '#f0f7ff' : 'transparent',
-                      color: isActive ? '#0066ff' : '#4a5568',
-                      '&:hover': { bgcolor: '#f7fafc' },
-                      transition: 'all 0.2s'
+                      borderRadius: '16px',
+                      mb: 0.75,
+                      py: 1.25,
+                      px: 2,
+                      bgcolor: isActive ? 'rgba(37, 99, 235, 0.08)' : 'transparent',
+                      color: isActive ? '#2563eb' : '#64748b',
+                      '&:hover': { bgcolor: 'rgba(0,0,0,0.02)', color: '#0f172a' },
+                      transition: 'all 0.3s ease',
+                      border: isActive ? '1px solid rgba(37, 99, 235, 0.1)' : '1px solid transparent'
                     }}
                   >
                     <ListItemIcon sx={{ color: 'inherit', minWidth: 38 }}>
@@ -127,7 +131,7 @@ const Sidebar = () => {
                     </ListItemIcon>
                     <ListItemText 
                       primary={item.text} 
-                      primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: isActive ? 600 : 500 }} 
+                      primaryTypographyProps={{ fontSize: '0.875rem', fontWeight: isActive ? 700 : 600 }} 
                     />
                   </ListItem>
                 );
@@ -137,38 +141,54 @@ const Sidebar = () => {
         ))}
       </Box>
 
-      <Divider sx={{ mx: 2, opacity: 0.6 }} />
-
-      <Box sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2.5 }}>
-          <Avatar sx={{ width: 40, height: 40, bgcolor: '#ebf4ff', color: '#3182ce', fontWeight: 'bold', fontSize: '0.875rem' }}>
-            {userData.initials}
-          </Avatar>
-          <Box>
-            <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1a202c', fontSize: '0.875rem', lineHeight: 1.2 }}>
-              {userData.role}
-            </Typography>
-            <Typography variant="caption" sx={{ color: '#718096', fontWeight: 600 }}>
-              {userData.name}
-            </Typography>
+      <Box sx={{ p: 2, mt: 'auto' }}>
+        <Box sx={{ 
+          p: 2, 
+          borderRadius: '20px', 
+          bgcolor: '#f8fafc', 
+          border: '1px solid #e2e8f0',
+          mb: 2
+        }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+            <Avatar sx={{ 
+              width: 38, 
+              height: 38, 
+              bgcolor: 'rgba(37, 99, 235, 0.1)', 
+              color: '#2563eb', 
+              fontWeight: 800, 
+              fontSize: '0.8rem',
+              border: '1px solid rgba(37, 99, 235, 0.2)'
+            }}>
+              {userData.initials}
+            </Avatar>
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#0f172a', fontSize: '0.8rem', lineHeight: 1.2 }}>
+                {userData.name}
+              </Typography>
+              <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 700 }}>
+                {userData.role}
+              </Typography>
+            </Box>
           </Box>
+          <Button 
+            fullWidth 
+            startIcon={<Logout />} 
+            onClick={handleLogout}
+            sx={{ 
+              color: '#64748b', 
+              justifyContent: 'center', 
+              textTransform: 'none',
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              bgcolor: '#ffffff',
+              borderRadius: '12px',
+              py: 1,
+              '&:hover': { bgcolor: '#fff1f2', color: '#e11d48' }
+            }}
+          >
+            Logout
+          </Button>
         </Box>
-        <Button 
-          fullWidth 
-          startIcon={<Logout />} 
-          variant="text" 
-          sx={{ 
-            color: '#4a5568', 
-            justifyContent: 'flex-start', 
-            textTransform: 'none',
-            fontSize: '0.875rem',
-            fontWeight: 600,
-            '&:hover': { bgcolor: '#fff5f5', color: '#e53e3e' }
-          }}
-          onClick={handleLogout}
-        >
-          Log Out
-        </Button>
       </Box>
     </Box>
   );

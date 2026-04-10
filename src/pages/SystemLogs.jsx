@@ -1,175 +1,168 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
   Paper, 
-  TextField, 
-  Button, 
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  IconButton,
-  InputAdornment,
-  Avatar,
-  Stack
+  IconButton, 
+  List, 
+  ListItem, 
+  ListItemText, 
+  ListItemAvatar, 
+  Avatar, 
+  Chip, 
+  Divider,
+  CircularProgress,
+  Button
 } from '@mui/material';
 import { 
-  FilterList,
-  ChevronLeft,
-  ChevronRight,
-  Search,
-  HistoryEdu,
-  Download,
-  MoreVert,
-  Circle
+  ArrowBack, 
+  NotificationsActive,
+  History
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import patientService from '../services/patientService';
 
 const SystemLogs = () => {
-  const [filter, setFilter] = useState('All');
+  const navigate = useNavigate();
+  const [alerts, setAlerts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const logs = [
-    { id: 1, timestamp: '09:42:15 AM', date: 'Oct 24, 2025', user: 'Dr. Aris Thorne', action: 'Scan Analysis Started', status: 'Success', category: 'CLINICAL' },
-    { id: 2, timestamp: '09:38:22 AM', date: 'Oct 24, 2025', user: 'Sarah Jenkins', action: 'Patient Registered', status: 'Success', category: 'ADMIN' },
-    { id: 3, timestamp: '09:15:04 AM', date: 'Oct 24, 2025', user: 'Admin', action: 'System Backup Completed', status: 'Success', category: 'SYSTEM' },
-    { id: 4, timestamp: '08:55:10 AM', date: 'Oct 24, 2025', user: 'Marcus Vane', action: 'Dose Alert Acknowledged', status: 'Warning', category: 'SAFETY' },
-    { id: 5, timestamp: '08:30:00 AM', date: 'Oct 24, 2025', user: 'Dr. Aris Thorne', action: 'Login Successful', status: 'Success', category: 'SECURITY' }
-  ];
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const response = await patientService.getRecentAlerts();
+        setAlerts(response.data || [
+          { id: 1, patient_name: 'John Doe', alert_level: 'CRITICAL', description: 'Oxygen saturation dropped below 85%', room_number: '101', created_at: new Date().toISOString() },
+          { id: 2, patient_name: 'Jane Smith', alert_level: 'WARNING', description: 'Heart rate slightly elevated', room_number: '204', created_at: new Date().toISOString() },
+        ]);
+      } catch (error) {
+        console.error("Error fetching alerts:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const categories = ['All', 'Clinical', 'Admin', 'System', 'Safety', 'Security'];
+    fetchAlerts();
+  }, []);
 
   return (
-    <Box sx={{ pb: 8 }}>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-            <Box sx={{ p: 1, borderRadius: '8px', bgcolor: '#ebf4ff', color: '#0066ff', display: 'flex' }}>
-              <HistoryEdu fontSize="small" />
-            </Box>
-            <Typography variant="h4" sx={{ fontWeight: 800, color: '#1a202c', letterSpacing: -0.5 }}>System Audit Portal</Typography>
-          </Box>
-          <Typography variant="body1" sx={{ color: '#a0aec0', fontWeight: 600 }}>Governable event tracking and system integrity logs</Typography>
-        </Box>
-        <Stack direction="row" spacing={2}>
-          <Button 
-            variant="outlined" 
-            startIcon={<Download />}
-            onClick={() => alert('Generating system audit report in CSV format...')}
-            sx={{ borderRadius: '12px', color: '#4a5568', borderColor: '#edf2f7', bgcolor: 'white', textTransform: 'none', fontWeight: 700 }}
-          >
-            Export CSV
-          </Button>
-          <Button 
-            variant="contained" 
-            startIcon={<FilterList />}
-            sx={{ borderRadius: '12px', bgcolor: '#0066ff', textTransform: 'none', fontWeight: 700 }}
-          >
-            Advanced Filter
-          </Button>
-        </Stack>
+    <Box sx={{ maxWidth: 800, mx: 'auto', pb: 8, px: 2 }}>
+      {/* Android Style Header */}
+      <Box sx={{ mb: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
+        <IconButton 
+          onClick={() => navigate('/dashboard')} 
+          sx={{ position: 'absolute', left: 0, top: 0, color: '#0f172a' }}
+        >
+          <ArrowBack />
+        </IconButton>
+        
+        <Typography variant="h5" sx={{ fontWeight: 900, color: '#0f172a', mb: 0.5 }}>
+          Alerts
+        </Typography>
+        <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 1 }}>
+          {alerts.length} Active Alerts
+        </Typography>
       </Box>
 
-      {/* Filter Toolbar */}
-      <Stack direction="row" spacing={1.5} sx={{ mb: 3, overflowX: 'auto', pb: 1 }}>
-        {categories.map((cat) => (
-          <Chip
-            key={cat}
-            label={cat}
-            onClick={() => setFilter(cat)}
-            sx={{ 
-              fontWeight: 800, 
-              px: 1,
-              bgcolor: filter === cat ? '#0066ff' : 'white',
-              color: filter === cat ? 'white' : '#718096',
-              border: '1px solid',
-              borderColor: filter === cat ? '#0066ff' : '#edf2f7',
-              '&:hover': { bgcolor: filter === cat ? '#0052cc' : '#f7fafc' }
-            }}
-          />
-        ))}
-      </Stack>
+      {/* Tab Style Row */}
+      <Box sx={{ mb: 3, borderBottom: '2px solid #2563eb' }}>
+        <Typography variant="body2" sx={{ 
+          display: 'inline-block', 
+          color: '#2563eb', 
+          fontWeight: 900, 
+          pb: 1, 
+          px: 2,
+          borderBottom: '4px solid #2563eb' 
+        }}>
+          All
+        </Typography>
+      </Box>
 
-      <Paper sx={{ p: 0, borderRadius: '24px', overflow: 'hidden', border: '1px solid #edf2f7', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
-        <Box sx={{ px: 3, py: 2.5, bgcolor: '#f7fafc', borderBottom: '1px solid #edf2f7', display: 'flex', alignItems: 'center', gap: 2 }}>
-          <TextField
-            placeholder="Search by user, action, or status..."
-            size="small"
-            fullWidth
-            sx={{ 
-              '& .MuiOutlinedInput-root': { 
-                borderRadius: '12px', 
-                bgcolor: 'white',
-                '& fieldset': { borderColor: 'transparent' },
-                '&:hover fieldset': { borderColor: '#e2e8f0' }
-              } 
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search sx={{ color: '#a0aec0' }} />
-                </InputAdornment>
-              )
-            }}
-          />
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+          <CircularProgress sx={{ color: '#2563eb' }} />
         </Box>
+      ) : (
+        <Paper className="glass-card" sx={{ overflow: 'hidden' }}>
+          <List disablePadding>
+            {alerts.map((alert, index) => (
+              <React.Fragment key={alert.id}>
+                <ListItem sx={{ py: 3, px: 4, '&:hover': { bgcolor: 'rgba(0,0,0,0.01)' } }}>
+                  <ListItemAvatar sx={{ minWidth: 70 }}>
+                    <Avatar sx={{ 
+                      width: 50, 
+                      height: 50, 
+                      bgcolor: 'rgba(37, 99, 235, 0.08)', 
+                      color: '#2563eb',
+                      border: '1px solid rgba(37, 99, 235, 0.1)'
+                    }}>
+                      <NotificationsActive />
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText 
+                    primary={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
+                        <Typography sx={{ fontWeight: 800, color: '#0f172a', fontSize: '1.1rem' }}>
+                          {alert.patient_name || "Unknown Patient"}
+                        </Typography>
+                        <Chip 
+                          label={alert.alert_level} 
+                          size="small" 
+                          sx={{ 
+                            bgcolor: alert.alert_level === 'CRITICAL' ? '#fee2e2' : '#fef3c7',
+                            color: alert.alert_level === 'CRITICAL' ? '#dc2626' : '#d97706',
+                            fontWeight: 800,
+                            fontSize: '0.65rem'
+                          }} 
+                        />
+                      </Box>
+                    }
+                    secondary={
+                      <Box>
+                        <Typography variant="body2" sx={{ color: '#475569', mb: 1 }}>{alert.description}</Typography>
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                          <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 700 }}>
+                            ROOM: {alert.room_number || "302"}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 700 }}>
+                            {new Date(alert.created_at).toLocaleTimeString()}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    }
+                  />
+                  <Button 
+                    variant="outlined" 
+                    size="small"
+                    sx={{ 
+                      borderRadius: '10px', 
+                      color: '#2563eb', 
+                      borderColor: 'rgba(37, 99, 235, 0.2)',
+                      textTransform: 'none',
+                      fontWeight: 700,
+                      '&:hover': { bgcolor: 'rgba(37, 99, 235, 0.05)', borderColor: '#2563eb' }
+                    }}
+                  >
+                    View Details
+                  </Button>
+                </ListItem>
+                {index < alerts.length - 1 && <Divider sx={{ opacity: 0.5, mx: 4 }} />}
+              </React.Fragment>
+            ))}
+          </List>
+        </Paper>
+      )}
 
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ bgcolor: '#ffffff' }}>
-                <TableCell sx={{ color: '#a0aec0', fontWeight: 800, fontSize: '0.7rem', py: 2, textTransform: 'uppercase' }}>Event Details</TableCell>
-                <TableCell sx={{ color: '#a0aec0', fontWeight: 800, fontSize: '0.7rem', py: 2, textTransform: 'uppercase' }}>Responsible User</TableCell>
-                <TableCell sx={{ color: '#a0aec0', fontWeight: 800, fontSize: '0.7rem', py: 2, textTransform: 'uppercase' }}>Category</TableCell>
-                <TableCell sx={{ color: '#a0aec0', fontWeight: 800, fontSize: '0.7rem', py: 2, textTransform: 'uppercase' }}>Compliance Status</TableCell>
-                <TableCell sx={{ py: 2 }} />
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {logs.map((log) => (
-                <TableRow key={log.id} sx={{ '&:hover': { bgcolor: '#fcfdff' }, transition: 'all 0.2s' }}>
-                  <TableCell>
-                    <Typography sx={{ fontWeight: 800, color: '#1a202c', fontSize: '0.9rem' }}>{log.action}</Typography>
-                    <Typography variant="caption" sx={{ color: '#a0aec0', fontWeight: 700 }}>{log.date} • {log.timestamp}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <Avatar sx={{ width: 32, height: 32, bgcolor: '#ebf4ff', color: '#3182ce', fontSize: '0.75rem', fontWeight: 800 }}>
-                        {log.user.split(' ').map(n => n[0]).join('')}
-                      </Avatar>
-                      <Typography sx={{ fontWeight: 700, color: '#4a5568', fontSize: '0.85rem' }}>{log.user}</Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Chip label={log.category} size="small" sx={{ fontWeight: 800, fontSize: '0.65rem', bgcolor: '#f7fafc', color: '#718096' }} />
-                  </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Circle sx={{ fontSize: 8, color: log.status === 'Success' ? '#38a169' : '#ecc94b' }} />
-                      <Typography sx={{ fontWeight: 800, color: log.status === 'Success' ? '#38a169' : '#dd6b20', fontSize: '0.8rem' }}>{log.status}</Typography>
-                    </Box>
-                  </TableCell>
-                  <TableCell align="right">
-                    <IconButton size="small"><MoreVert sx={{ color: '#cbd5e0' }} /></IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        <Box sx={{ p: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #edf2f7' }}>
-          <Typography variant="caption" sx={{ color: '#a0aec0', fontWeight: 700 }}>
-            Displaying 5 of 1,284 records
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1.5 }}>
-            <Button size="small" disabled variant="outlined" sx={{ borderRadius: '8px', textTransform: 'none', fontWeight: 700 }}>Previous</Button>
-            <Button size="small" variant="outlined" sx={{ borderRadius: '8px', textTransform: 'none', fontWeight: 700, borderColor: '#0066ff', color: '#0066ff' }}>Next</Button>
-          </Box>
-        </Box>
-      </Paper>
+      {/* Technical Logs Footer */}
+      <Box sx={{ mt: 4, textAlign: 'center' }}>
+        <Button 
+          startIcon={<History />}
+          onClick={() => alert("System Audit Logs portal is accessible via Admin settings.")}
+          sx={{ color: '#94a3b8', fontWeight: 700, textTransform: 'none', '&:hover': { color: '#0f172a' } }}
+        >
+          View Technical System Logs
+        </Button>
+      </Box>
     </Box>
   );
 };

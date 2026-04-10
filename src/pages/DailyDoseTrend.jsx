@@ -2,90 +2,101 @@ import React from 'react';
 import { 
   Box, 
   Typography, 
-  IconButton, 
   List, 
   ListItem, 
   ListItemText, 
   Paper,
-  BottomNavigation,
-  BottomNavigationAction
+  Chip
 } from '@mui/material';
 import { 
-  ArrowBack as ArrowBackIcon, 
-  Home, 
-  People, 
-  Settings 
+  TrendingUp,
+  Info
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 
 const DailyDoseTrend = () => {
-  const navigate = useNavigate();
-  const [value, setValue] = React.useState(0);
-
   // Mock data for daily trend
   const trends = [
-    { id: '1', date: 'Oct 24, 2023', dose: '1.2 mSv', status: 'Optimal' },
-    { id: '2', date: 'Oct 23, 2023', dose: '2.5 mSv', status: 'High' },
-    { id: '3', date: 'Oct 22, 2023', dose: '0.8 mSv', status: 'Optimal' }
+    { id: '1', date: 'Oct 24, 2023', dose: '1.2 mSv', status: 'Optimal', color: '#10b981' },
+    { id: '2', date: 'Oct 23, 2023', dose: '2.5 mSv', status: 'High', color: '#ef4444' },
+    { id: '3', date: 'Oct 22, 2023', dose: '0.8 mSv', status: 'Optimal', color: '#10b981' },
+    { id: '4', date: 'Oct 21, 2023', dose: '1.5 mSv', status: 'Optimal', color: '#10b981' },
+    { id: '5', date: 'Oct 20, 2023', dose: '1.1 mSv', status: 'Optimal', color: '#10b981' },
   ];
 
   return (
-    <Box sx={{ bgcolor: '#000033', minHeight: '100vh', color: 'white', pb: 7 }}>
-      {/* Header */}
-      <Box sx={{ p: 2, display: 'flex', alignItems: 'center' }}>
-        <IconButton onClick={() => navigate('/dashboard')} sx={{ color: 'white' }}>
-          <ArrowBackIcon />
-        </IconButton>
-        <Typography variant="h6" sx={{ flexGrow: 1, textAlign: 'center', fontWeight: 'bold' }}>
-          Daily Dose Trend
-        </Typography>
+    <Box sx={{ maxWidth: 800, mx: 'auto', pb: 4 }}>
+      <Box sx={{ mb: 6, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Box sx={{ 
+            p: 1.5, 
+            borderRadius: '16px', 
+            bgcolor: 'rgba(37, 99, 235, 0.08)', 
+            color: '#2563eb', 
+            display: 'flex',
+            border: '1px solid rgba(37, 99, 235, 0.1)'
+        }}>
+          <TrendingUp sx={{ fontSize: 32 }} />
+        </Box>
+        <Box>
+          <Typography variant="h4" sx={{ fontWeight: 900, color: '#0f172a', letterSpacing: -0.5 }}>
+            Daily Dose Trends
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 700 }}>
+            Historical record of diagnostic radiation patterns
+          </Typography>
+        </Box>
       </Box>
 
       {/* Trend List */}
-      <List sx={{ px: 2 }}>
+      <List disablePadding sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         {trends.map((item) => (
-          <ListItem 
+          <Paper 
             key={item.id} 
+            className="glass-card"
             sx={{ 
-              bgcolor: 'rgba(255, 255, 255, 0.05)', 
-              borderRadius: 2, 
-              mb: 1.5,
-              borderLeft: `5px solid ${item.status === 'High' ? '#D32F2F' : '#4caf50'}`
+              borderRadius: '24px', 
+              transition: 'all 0.2s',
+              border: '1px solid #f1f5f9',
+              '&:hover': { transform: 'translateX(8px)', bgcolor: 'rgba(37, 99, 235, 0.02)' }
             }}
           >
-            <ListItemText
-              primary={
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: 'white' }}>
-                  {item.date}
-                </Typography>
-              }
-              secondary={
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 0.5 }}>
-                  <Typography variant="body2" sx={{ color: '#ccc' }}>
-                    Total Dose: {item.dose}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: item.status === 'High' ? '#D32F2F' : '#4caf50' }}>
-                    {item.status}
-                  </Typography>
-                </Box>
-              }
-            />
-          </ListItem>
+            <ListItem sx={{ py: 3, px: 4 }}>
+              <ListItemText
+                primary={
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 900, color: '#0f172a', letterSpacing: -0.2 }}>
+                      {item.date}
+                    </Typography>
+                    <Chip 
+                      label={item.status} 
+                      size="small" 
+                      sx={{ 
+                        bgcolor: `${item.color}15`, 
+                        color: item.color, 
+                        fontWeight: 900, 
+                        fontSize: '0.65rem',
+                        height: 22,
+                        px: 1
+                      }} 
+                    />
+                  </Box>
+                }
+                secondary={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: 0.5 }}>Total Dose:</Typography>
+                      <Typography variant="body2" sx={{ fontWeight: 900, color: '#0f172a' }}>{item.dose}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8, color: '#94a3b8' }}>
+                      <Info sx={{ fontSize: 16 }} />
+                      <Typography variant="caption" sx={{ fontWeight: 700 }}>Clinical Protocol Validated</Typography>
+                    </Box>
+                  </Box>
+                }
+              />
+            </ListItem>
+          </Paper>
         ))}
       </List>
-
-      {/* Bottom Navigation */}
-      <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0 }} elevation={3}>
-        <BottomNavigation
-          showLabels
-          value={value}
-          onChange={(event, newValue) => setValue(newValue)}
-        >
-          <BottomNavigationAction label="Home" icon={<Home />} />
-          <BottomNavigationAction label="Patients" icon={<People />} />
-          <BottomNavigationAction label="Settings" icon={<Settings />} />
-        </BottomNavigation>
-      </Paper>
     </Box>
   );
 };

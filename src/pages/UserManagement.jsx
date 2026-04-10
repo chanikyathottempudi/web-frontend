@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -10,7 +10,8 @@ import {
   ListItemText,
   Button,
   Chip,
-  IconButton
+  IconButton,
+  CircularProgress
 } from '@mui/material';
 import { 
   PersonAdd,
@@ -18,13 +19,41 @@ import {
   BadgeOutlined,
   AdminPanelSettings
 } from '@mui/icons-material';
+import adminService from '../services/adminService';
 
 const UserManagement = () => {
-  const users = [
-    { name: 'Dr. Aris Thorne', role: 'Senior Radiologist', id: 'RAD-204', status: 'Active', color: '#38a169' },
-    { name: 'Sarah Jenkins', role: 'Lead Technician', id: 'TEC-882', status: 'Active', color: '#38a169' },
-    { name: 'Marcus Vane', role: 'CT Technician', id: 'TEC-104', status: 'Away', color: '#ecc94b' }
-  ];
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await adminService.getUsers();
+        // The API uses pagination, so users are in response.results
+        const fetchedUsers = (response.results || response || []).map(user => ({
+          name: `${user.first_name} ${user.last_name}`.trim() || user.username,
+          role: user.role_display || 'Staff',
+          id: user.employee_id_display || user.id,
+          status: user.is_active ? 'Active' : 'Inactive',
+          color: user.is_active ? '#38a169' : '#e53e3e'
+        }));
+        setUsers(fetchedUsers);
+      } catch (error) {
+        console.error("Failed to fetch users:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ pb: 8 }}>

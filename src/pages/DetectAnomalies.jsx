@@ -54,29 +54,38 @@ const DetectAnomalies = () => {
   }, []);
 
   return (
-    <Box sx={{ pb: 8 }}>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+    <Box sx={{ pb: 8, maxWidth: 1000, mx: 'auto' }}>
+      <Box sx={{ mb: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: '#1a202c', mb: 0.5 }}>AI Anomaly Detector</Typography>
-          <Typography variant="body1" sx={{ color: '#a0aec0', fontWeight: 600 }}>Identifying irregular dose patterns using deep learning</Typography>
+          <Typography variant="h4" sx={{ fontWeight: 900, color: '#0f172a', letterSpacing: -1, mb: 0.5 }}>AI Anomaly Detector</Typography>
+          <Typography variant="body1" sx={{ color: '#64748b', fontWeight: 700 }}>Identifying irregular dose patterns using neural analysis</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
           <TextField 
-            label="Patient ID" 
+            label="Patient Access ID" 
             variant="outlined" 
             size="small" 
             value={patientId}
             onChange={(e) => setPatientId(e.target.value)}
-            sx={{ width: 200, '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: 'white' } }}
+            sx={{ width: 220, '& .MuiOutlinedInput-root': { borderRadius: '16px', bgcolor: 'white' } }}
           />
           <Button 
             variant="contained" 
             startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <Sync />}
             onClick={fetchAnomalies}
             disabled={loading}
-            sx={{ bgcolor: '#0066ff', borderRadius: '12px', px: 3, fontWeight: 700 }}
+            sx={{ 
+                bgcolor: '#2563eb', 
+                borderRadius: '16px', 
+                px: 3, 
+                py: 1.2,
+                fontWeight: 800, 
+                textTransform: 'none',
+                boxShadow: '0 8px 20px rgba(37, 99, 235, 0.2)',
+                '&:hover': { bgcolor: '#1d4ed8' }
+            }}
           >
-            Re-scan
+            {loading ? 'Analyzing...' : 'Re-scan Patterns'}
           </Button>
         </Box>
       </Box>
@@ -84,28 +93,29 @@ const DetectAnomalies = () => {
       <Grid container spacing={4}>
         {/* Status Card */}
         <Grid item xs={12} md={4}>
-          <Paper sx={{ p: 4, borderRadius: '24px', bgcolor: 'white', textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <Paper className="glass-card" sx={{ p: 5, textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <Box sx={{ 
               width: 80, 
               height: 80, 
               borderRadius: '24px', 
-              bgcolor: anomalies.length > 0 ? '#fff5f5' : '#f0fff4', 
+              bgcolor: anomalies.length > 0 ? 'rgba(239, 68, 68, 0.05)' : 'rgba(16, 185, 129, 0.05)', 
               display: 'flex', 
               alignItems: 'center', 
               justifyContent: 'center',
-              margin: '0 auto mb: 3',
-              mb: 3
+              margin: '0 auto',
+              mb: 3,
+              border: `1px solid ${anomalies.length > 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)'}`
             }}>
               {anomalies.length > 0 ? (
-                <Warning sx={{ fontSize: 40, color: '#e53e3e' }} />
+                <Warning sx={{ fontSize: 40, color: '#ef4444' }} />
               ) : (
-                <Insights sx={{ fontSize: 40, color: '#38a169' }} />
+                <Insights sx={{ fontSize: 40, color: '#10b981' }} />
               )}
             </Box>
-            <Typography variant="h5" sx={{ fontWeight: 800, color: '#1a202c', mb: 1 }}>
-              {loading ? 'Analyzing...' : (anomalies.length > 0 ? 'Action Required' : 'Scan Healthy')}
+            <Typography variant="h5" sx={{ fontWeight: 900, color: '#0f172a', mb: 1, letterSpacing: -0.5 }}>
+              {loading ? 'Intelligence Scan...' : (anomalies.length > 0 ? 'Critical Attention' : 'Pattern Healthy')}
             </Typography>
-            <Typography variant="body2" sx={{ color: '#718096', fontWeight: 600, px: 2 }}>
+            <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 700, px: 2, lineHeight: 1.6 }}>
               {message}
             </Typography>
             
@@ -113,12 +123,12 @@ const DetectAnomalies = () => {
             
             <Box sx={{ display: 'flex', justifyContent: 'space-around' }}>
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 800, color: '#1a202c' }}>{anomalies.length}</Typography>
-                <Typography variant="caption" sx={{ color: '#a0aec0', fontWeight: 700 }}>ISSUES</Typography>
+                <Typography variant="h5" sx={{ fontWeight: 900, color: anomalies.length > 0 ? '#ef4444' : '#0f172a' }}>{anomalies.length}</Typography>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800, letterSpacing: 1 }}>ANOMALIES</Typography>
               </Box>
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 800, color: '#1a202c' }}>0</Typography>
-                <Typography variant="caption" sx={{ color: '#a0aec0', fontWeight: 700 }}>RESOLVED</Typography>
+                <Typography variant="h5" sx={{ fontWeight: 900, color: '#0f172a' }}>100%</Typography>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800, letterSpacing: 1 }}>PRECISION</Typography>
               </Box>
             </Box>
           </Paper>
@@ -126,31 +136,31 @@ const DetectAnomalies = () => {
 
         {/* Anomaly List */}
         <Grid item xs={12} md={8}>
-          <Typography variant="h6" sx={{ fontWeight: 800, color: '#4a5568', mb: 3 }}>Detected Issues</Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 900, color: '#94a3b8', mb: 3, textTransform: 'uppercase', letterSpacing: 1.5 }}>INTELLIGENCE OBSERVATIONS</Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             {anomalies.length > 0 ? anomalies.map((anomaly, index) => (
-              <Paper key={index} sx={{ p: 3, borderRadius: '20px', bgcolor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #edf2f7', '&:hover': { borderColor: '#0066ff', transform: 'translateY(-2px)', transition: 'all 0.2s' } }}>
+              <Paper key={index} className="glass-card" sx={{ p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid #f1f5f9', cursor: 'pointer', transition: 'all 0.2s', '&:hover': { transform: 'translateX(10px)', bgcolor: 'rgba(37, 99, 235, 0.02)' } }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                  <Avatar sx={{ bgcolor: anomaly.status_level === 'CRITICAL' ? '#fff5f5' : '#fffaf0', color: anomaly.status_level === 'CRITICAL' ? '#e53e3e' : '#ed8936', borderRadius: '12px', width: 48, height: 48 }}>
+                  <Avatar sx={{ bgcolor: anomaly.status_level === 'CRITICAL' ? 'rgba(239, 68, 68, 0.08)' : 'rgba(245, 158, 11, 0.08)', color: anomaly.status_level === 'CRITICAL' ? '#ef4444' : '#f59e0b', borderRadius: '14px', width: 52, height: 52, border: `1px solid ${anomaly.status_level === 'CRITICAL' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(245, 158, 11, 0.1)'}` }}>
                     <PriorityHigh />
                   </Avatar>
                   <Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 800, color: '#1a202c' }}>{anomaly.anomaly_id}</Typography>
-                      <Chip label={anomaly.status_level} size="small" sx={{ bgcolor: anomaly.status_level === 'CRITICAL' ? '#fed7d7' : '#feebc8', color: anomaly.status_level === 'CRITICAL' ? '#c53030' : '#c05621', fontWeight: 800, fontSize: '0.65rem' }} />
+                      <Typography variant="subtitle1" sx={{ fontWeight: 900, color: '#0f172a' }}>{anomaly.anomaly_id}</Typography>
+                      <Chip label={anomaly.status_level} size="small" sx={{ bgcolor: anomaly.status_level === 'CRITICAL' ? '#fee2e2' : '#fef3c7', color: anomaly.status_level === 'CRITICAL' ? '#dc2626' : '#d97706', fontWeight: 900, fontSize: '0.65rem', height: 20 }} />
                     </Box>
-                    <Typography variant="body2" sx={{ color: '#4a5568', fontWeight: 600 }}>{anomaly.description}</Typography>
-                    <Typography variant="caption" sx={{ color: '#a0aec0', fontWeight: 700 }}>AREA: {anomaly.area} • VALUE: {anomaly.dlp_value} mGy.cm</Typography>
+                    <Typography variant="body2" sx={{ color: '#475569', fontWeight: 700, mb: 0.5 }}>{anomaly.description}</Typography>
+                    <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800 }}>AREA: {anomaly.area} • PEAK: {anomaly.dlp_value} mGy.cm</Typography>
                   </Box>
                 </Box>
-                <IconButton sx={{ bgcolor: '#f7fafc', p: 1.5 }}>
-                  <ChevronRight sx={{ color: '#a0aec0' }} />
+                <IconButton sx={{ bgcolor: '#f8fafc', p: 1.2, color: '#cbd5e1' }}>
+                  <ChevronRight />
                 </IconButton>
               </Paper>
             )) : !loading && (
-              <Paper sx={{ p: 8, borderRadius: '24px', bgcolor: 'white', textAlign: 'center', border: '1px dashed #e2e8f0' }}>
-                <NotificationsActive sx={{ fontSize: 48, color: '#edf2f7', mb: 2 }} />
-                <Typography sx={{ color: '#a0aec0', fontWeight: 600 }}>System check complete. No anomalies found for this patient.</Typography>
+              <Paper sx={{ p: 8, borderRadius: '32px', bgcolor: 'rgba(255,255,255,0.4)', textAlign: 'center', border: '1px dashed #e2e8f0' }}>
+                <NotificationsActive sx={{ fontSize: 48, color: '#cbd5e1', mb: 2 }} />
+                <Typography sx={{ color: '#64748b', fontWeight: 800 }}>System Integrity Check: No anomalies detected.</Typography>
               </Paper>
             )}
           </Box>

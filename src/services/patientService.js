@@ -24,6 +24,16 @@ const patientService = {
   getActiveAlertsCount: async () => {
     const response = await api.get('/patients/alerts/active_count/');
     return response.data;
+  },
+
+  getRecentAlerts: async () => {
+    const response = await api.get('/patients/alerts/');
+    return response.data;
+  },
+
+  getPatientDetails: async (id) => {
+    const response = await api.get(`/patients/patients/${id}/`);
+    return response.data;
   }
 };
 

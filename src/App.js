@@ -17,6 +17,8 @@ import SystemLogs from './pages/SystemLogs';
 import ForgotPassword from './pages/ForgotPassword';
 import PredictDose from './pages/PredictDose';
 import DetectAnomalies from './pages/DetectAnomalies';
+import DailyDoseTrend from './pages/DailyDoseTrend';
+import MonthlyDoseTrend from './pages/MonthlyDoseTrend';
 import Layout from './components/Layout';
 
 const lightTheme = createTheme({
@@ -80,9 +82,11 @@ function App() {
           <Route path="/admin" element={<Layout title="Admin Control Center"><AdminControlCenter /></Layout>} />
           <Route path="/user-management" element={<Layout title="User Management"><UserManagement /></Layout>} />
           <Route path="/system-logs" element={<Layout title="System Logs"><SystemLogs /></Layout>} />
-          <Route path="/predict-dose" element={<Layout title="Predict Dose"><PredictDose /></Layout>} />
-          <Route path="/detect-anomalies" element={<Layout title="Detect Anomalies"><DetectAnomalies /></Layout>} />
+          <Route path="/predict-dose" element={<Layout title="Dose Prediction"><PredictDose /></Layout>} />
+          <Route path="/detect-anomalies" element={<Layout title="Anomaly Detection"><DetectAnomalies /></Layout>} />
           <Route path="/ai-risk" element={<Layout title="AI Risk Score"><AiRiskScore /></Layout>} />
+          <Route path="/daily-dose-trend" element={<Layout title="Daily Dose Trend"><DailyDoseTrend /></Layout>} />
+          <Route path="/monthly-dose-trend" element={<Layout title="Monthly Dose Trend"><MonthlyDoseTrend /></Layout>} />
         </Routes>
       </Router>
     </ThemeProvider>

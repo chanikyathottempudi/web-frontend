@@ -9,9 +9,11 @@ import {
   Select,
   FormControl,
   Paper,
-  Grid
+  Grid,
+  IconButton,
+  CircularProgress
 } from '@mui/material';
-import { PersonAdd, Close } from '@mui/icons-material';
+import { PersonAdd, ArrowBack } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import patientService from '../services/patientService';
 
@@ -22,7 +24,10 @@ const PatientRegister = () => {
     dob: '',
     gender: '',
     patient_id: '',
-    allergies: ''
+    allergies: '',
+    age: '',
+    blood_group: '',
+    clinical_notes: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -36,10 +41,18 @@ const PatientRegister = () => {
     setLoading(true);
     setError('');
     try {
-      await patientService.registerPatient(formData);
+      const payload = { ...formData, allergies: formData.allergies.trim() || 'None' };
+      await patientService.registerPatient(payload);
       navigate('/patients');
     } catch (err) {
-      setError('Registration failed. Please check inputs.');
+      const serverError = err.response?.data;
+      if (serverError && typeof serverError === 'object') {
+        const firstKey = Object.keys(serverError)[0];
+        const errorMsg = Array.isArray(serverError[firstKey]) ? serverError[firstKey][0] : serverError[firstKey];
+        setError(`${firstKey}: ${errorMsg}`);
+      } else {
+        setError('Registration failed. Please check inputs.');
+      }
       console.error(err);
     } finally {
       setLoading(false);
@@ -47,53 +60,92 @@ const PatientRegister = () => {
   };
 
   return (
-    <Box>
+    <Box sx={{ pb: 8 }}>
       <Container maxWidth="md">
-        <Paper sx={{ p: 4, borderRadius: '24px', bgcolor: 'white' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
-            <Box sx={{ p: 1.5, borderRadius: '12px', bgcolor: '#ebf4ff', color: '#3182ce' }}>
-              <PersonAdd fontSize="large" />
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 6 }}>
+            <IconButton onClick={() => navigate('/patients')} sx={{ color: '#0f172a' }}>
+                <ArrowBack />
+            </IconButton>
+            <Typography variant="h5" sx={{ 
+                fontWeight: 900, 
+                flexGrow: 1, 
+                textAlign: 'center',
+                color: '#0f172a',
+                letterSpacing: -0.5
+            }}>
+                Patient Registration
+            </Typography>
+        </Box>
+
+        <Paper className="glass-card" sx={{ p: 6 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5, mb: 6 }}>
+            <Box sx={{ 
+                p: 2, 
+                borderRadius: '16px', 
+                bgcolor: 'rgba(37, 99, 235, 0.08)', 
+                color: '#2563eb',
+                border: '1px solid rgba(37, 99, 235, 0.1)'
+            }}>
+              <PersonAdd sx={{ fontSize: 32 }} />
             </Box>
             <Box>
-              <Typography variant="h5" sx={{ fontWeight: 800, color: '#1a202c' }}>Register New Patient</Typography>
-              <Typography variant="body2" sx={{ color: '#a0aec0', fontWeight: 600 }}>Enter patient details to initialize analysis</Typography>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a', lineHeight: 1.2 }}>New Patient Entry</Typography>
+              <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 600 }}>Create a secure medical profile</Typography>
             </Box>
           </Box>
 
           <form onSubmit={handleSubmit}>
             {error && (
-              <Paper sx={{ p: 2, mb: 3, bgcolor: '#fff5f5', border: '1px solid #feb2b2', borderRadius: '12px' }}>
-                <Typography color="error" variant="body2" sx={{ fontWeight: 600 }}>{error}</Typography>
+              <Paper sx={{ p: 2, mb: 5, bgcolor: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '12px' }}>
+                <Typography color="#dc2626" variant="body2" sx={{ fontWeight: 800 }}>Error encountered: {error}</Typography>
               </Paper>
             )}
 
-            <Grid container spacing={3}>
+            <Grid container spacing={4}>
               <Grid item xs={12} md={6}>
-                <Typography variant="caption" sx={{ color: '#4a5568', fontWeight: 700, mb: 1, display: 'block', textTransform: 'uppercase' }}>Full Name</Typography>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800, mb: 1.5, display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>Full Name</Typography>
                 <TextField
                   fullWidth
+                  required
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="e.g. Ethan Carter"
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#f7fafc' } }}
+                  sx={{ 
+                    '& .MuiOutlinedInput-root': { 
+                      borderRadius: '16px', 
+                      bgcolor: '#f8fafc',
+                      color: '#0f172a',
+                      '& fieldset': { borderColor: '#e2e8f0' },
+                      '&:hover fieldset': { borderColor: '#2563eb' }
+                    } 
+                  }}
                 />
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <Typography variant="caption" sx={{ color: '#4a5568', fontWeight: 700, mb: 1, display: 'block', textTransform: 'uppercase' }}>Patient ID</Typography>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800, mb: 1.5, display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>Patient ID</Typography>
                 <TextField
                   fullWidth
+                  required
                   name="patient_id"
                   value={formData.patient_id}
                   onChange={handleChange}
-                  placeholder="PID-XXXXX"
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#f7fafc' } }}
+                  placeholder="e.g. VG-2024-001"
+                  sx={{ 
+                    '& .MuiOutlinedInput-root': { 
+                      borderRadius: '16px', 
+                      bgcolor: '#f8fafc',
+                      color: '#0f172a',
+                      '& fieldset': { borderColor: '#e2e8f0' },
+                      '&:hover fieldset': { borderColor: '#2563eb' }
+                    } 
+                  }}
                 />
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <Typography variant="caption" sx={{ color: '#4a5568', fontWeight: 700, mb: 1, display: 'block', textTransform: 'uppercase' }}>Date of Birth</Typography>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800, mb: 1.5, display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>Date of Birth</Typography>
                 <TextField
                   fullWidth
                   name="dob"
@@ -101,19 +153,35 @@ const PatientRegister = () => {
                   value={formData.dob}
                   onChange={handleChange}
                   InputLabelProps={{ shrink: true }}
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#f7fafc' } }}
+                  sx={{ 
+                    '& .MuiOutlinedInput-root': { 
+                      borderRadius: '16px', 
+                      bgcolor: '#f8fafc',
+                      color: '#0f172a',
+                      '& fieldset': { borderColor: '#e2e8f0' },
+                      '&:hover fieldset': { borderColor: '#2563eb' }
+                    }
+                  }}
                 />
               </Grid>
 
               <Grid item xs={12} md={6}>
-                <Typography variant="caption" sx={{ color: '#4a5568', fontWeight: 700, mb: 1, display: 'block', textTransform: 'uppercase' }}>Gender</Typography>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800, mb: 1.5, display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>Gender</Typography>
                 <FormControl fullWidth>
                   <Select
                     name="gender"
                     value={formData.gender}
                     onChange={handleChange}
                     displayEmpty
-                    sx={{ borderRadius: '12px', bgcolor: '#f7fafc' }}
+                    required
+                    sx={{ 
+                        borderRadius: '16px', 
+                        bgcolor: '#f8fafc',
+                        color: formData.gender ? '#0f172a' : '#94a3b8',
+                        '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e2e8f0' },
+                        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#2563eb' },
+                        '& .MuiSelect-icon': { color: '#94a3b8' }
+                    }}
                   >
                     <MenuItem value="" disabled>Select gender</MenuItem>
                     <MenuItem value="Male">Male</MenuItem>
@@ -123,49 +191,120 @@ const PatientRegister = () => {
                 </FormControl>
               </Grid>
 
+              <Grid item xs={12} md={6}>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800, mb: 1.5, display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>Age (Years)</Typography>
+                <TextField
+                  fullWidth
+                  name="age"
+                  type="number"
+                  value={formData.age}
+                  onChange={handleChange}
+                  placeholder="e.g. 24"
+                  sx={{ 
+                    '& .MuiOutlinedInput-root': { 
+                      borderRadius: '16px', 
+                      bgcolor: '#f8fafc',
+                      color: '#0f172a',
+                      '& fieldset': { borderColor: '#e2e8f0' },
+                      '&:hover fieldset': { borderColor: '#2563eb' }
+                    } 
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800, mb: 1.5, display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>Blood Group</Typography>
+                <TextField
+                  fullWidth
+                  name="blood_group"
+                  value={formData.blood_group}
+                  onChange={handleChange}
+                  placeholder="e.g. O+, B-"
+                  sx={{ 
+                    '& .MuiOutlinedInput-root': { 
+                      borderRadius: '16px', 
+                      bgcolor: '#f8fafc',
+                      color: '#0f172a',
+                      '& fieldset': { borderColor: '#e2e8f0' },
+                      '&:hover fieldset': { borderColor: '#2563eb' }
+                    } 
+                  }}
+                />
+              </Grid>
+
               <Grid item xs={12}>
-                <Typography variant="caption" sx={{ color: '#4a5568', fontWeight: 700, mb: 1, display: 'block', textTransform: 'uppercase' }}>Allergies / Notes</Typography>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800, mb: 1.5, display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>Allergies</Typography>
                 <TextField
                   fullWidth
                   name="allergies"
                   value={formData.allergies}
                   onChange={handleChange}
+                  placeholder="e.g. Penicillin, Peanuts (or 'None')"
+                  sx={{ 
+                    '& .MuiOutlinedInput-root': { 
+                      borderRadius: '16px', 
+                      bgcolor: '#f8fafc',
+                      color: '#0f172a',
+                      '& fieldset': { borderColor: '#e2e8f0' },
+                      '&:hover fieldset': { borderColor: '#2563eb' }
+                    } 
+                  }}
+                />
+              </Grid>
+
+              <Grid item xs={12}>
+                <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800, mb: 1.5, display: 'block', textTransform: 'uppercase', letterSpacing: 1 }}>Clinical History & Notes</Typography>
+                <TextField
+                  fullWidth
                   multiline
                   rows={3}
-                  placeholder="Describe any known allergies or medical notes..."
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#f7fafc' } }}
+                  name="clinical_notes"
+                  value={formData.clinical_notes || ''}
+                  onChange={handleChange}
+                  placeholder="Brief summary of patient history, primary diagnosis..."
+                  sx={{ 
+                    '& .MuiOutlinedInput-root': { 
+                      borderRadius: '16px', 
+                      bgcolor: '#f8fafc',
+                      color: '#0f172a',
+                      '& fieldset': { borderColor: '#e2e8f0' },
+                      '&:hover fieldset': { borderColor: '#2563eb' }
+                    } 
+                  }}
                 />
               </Grid>
             </Grid>
 
-            <Box sx={{ display: 'flex', gap: 2, mt: 5 }}>
+            <Box sx={{ display: 'flex', gap: 3, mt: 6 }}>
               <Button
                 fullWidth
                 type="submit"
                 variant="contained"
                 disabled={loading}
                 sx={{ 
-                  bgcolor: '#0066ff', 
-                  py: 1.8, 
-                  borderRadius: '12px', 
+                  bgcolor: '#2563eb', 
+                  py: 2, 
+                  borderRadius: '16px', 
                   textTransform: 'none', 
-                  fontWeight: 800,
+                  fontWeight: 900,
                   fontSize: '1rem',
-                  boxShadow: '0 8px 20px rgba(0, 102, 255, 0.2)'
+                  boxShadow: '0 8px 30px rgba(37, 99, 235, 0.2)',
+                  '&:hover': { bgcolor: '#1d4ed8' }
                 }}
               >
-                {loading ? 'Registering...' : 'Register Patient'}
+                {loading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Register Patient Record'}
               </Button>
               <Button
-                variant="outlined"
                 onClick={() => navigate('/patients')}
                 sx={{ 
                   px: 4, 
-                  borderRadius: '12px', 
-                  borderColor: '#edf2f7', 
-                  color: '#4a5568',
+                  borderRadius: '16px', 
+                  color: '#64748b',
+                  bgcolor: '#ffffff',
+                  border: '1px solid #e2e8f0',
                   textTransform: 'none',
-                  fontWeight: 700
+                  fontWeight: 700,
+                  '&:hover': { bgcolor: '#f8fafc', color: '#0f172a' }
                 }}
               >
                 Cancel

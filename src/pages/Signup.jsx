@@ -39,8 +39,35 @@ const Signup = () => {
     setError('');
     setSuccess('');
     
+    // 1. Full Name: Only letters and spaces
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    if (!nameRegex.test(formData.fullName)) {
+      setError('Full Name should only contain letters');
+      return;
+    }
+
+    // 2. Email: Must end with @gmail.com and contain letters/numbers before it
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    if (!emailRegex.test(formData.email)) {
+      setError('Please use a valid @gmail.com address');
+      return;
+    }
+
+    // 3. Password: Min 8 chars, 1 upper, 1 lower, 1 number
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      setError('Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, and a number');
+      return;
+    }
+
+    // 4. Confirm Password: Match with password
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
+      return;
+    }
+
+    if (!formData.role) {
+      setError('Please select a clinical role');
       return;
     }
 
@@ -64,16 +91,16 @@ const Signup = () => {
   };
 
   return (
-    <Box sx={{ bgcolor: '#f7fafc', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3 }}>
+    <Box sx={{ bgcolor: '#f8fafc', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', p: 3 }}>
       <Container maxWidth="sm">
-        <Paper sx={{ p: 5, borderRadius: '32px', boxShadow: '0 20px 40px rgba(0,0,0,0.05)' }}>
+        <Paper sx={{ p: 5, borderRadius: '32px', boxShadow: '0 20px 40px rgba(0,0,0,0.03)', border: '1px solid #f1f5f9' }}>
           <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton onClick={() => navigate('/login')} sx={{ bgcolor: '#f7fafc', color: '#4a5568' }}>
+            <IconButton onClick={() => navigate('/login')} sx={{ bgcolor: 'white', color: '#0f172a', border: '1px solid #e2e8f0' }}>
               <ArrowBack />
             </IconButton>
             <Box>
-              <Typography variant="h5" sx={{ fontWeight: 900, color: '#1a202c' }}>Request Access</Typography>
-              <Typography variant="body2" sx={{ color: '#a0aec0', fontWeight: 600 }}>Create your professional account</Typography>
+              <Typography variant="h5" sx={{ fontWeight: 900, color: '#0f172a', letterSpacing: -0.5 }}>Request Access</Typography>
+              <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 700 }}>Initialize your clinical credentials</Typography>
             </Box>
           </Box>
 
@@ -167,13 +194,13 @@ const Signup = () => {
               sx={{ 
                 mt: 4, 
                 mb: 2, 
-                bgcolor: '#0066ff', 
+                bgcolor: '#2563eb', 
                 borderRadius: '12px',
                 py: 1.8,
                 textTransform: 'none',
                 fontWeight: 800,
                 fontSize: '1rem',
-                boxShadow: '0 8px 16px rgba(0, 102, 255, 0.2)'
+                boxShadow: '0 8px 16px rgba(37, 99, 235, 0.2)'
               }}
             >
               Initialize Account Request
@@ -181,13 +208,13 @@ const Signup = () => {
           </form>
 
           <Box sx={{ mt: 3, textAlign: 'center' }}>
-            <Typography variant="body2" sx={{ color: '#a0aec0', fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 700 }}>
               Already registered? {' '}
               <Link 
                 component="button"
                 type="button"
                 onClick={() => navigate('/login')}
-                sx={{ color: '#0066ff', fontWeight: 800, textDecoration: 'none' }}
+                sx={{ color: '#2563eb', fontWeight: 800, textDecoration: 'none' }}
               >
                 Sign In
               </Link>

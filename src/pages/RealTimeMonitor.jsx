@@ -1,170 +1,226 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Box, 
   Typography, 
-  Paper,
-  Container,
-  Avatar,
-  Chip,
-  LinearProgress,
-  Grid,
-  Divider
+  Paper, 
+  IconButton, 
+  TextField, 
+  Button, 
+  Stack,
+  Alert,
+  Snackbar,
+  CircularProgress
 } from '@mui/material';
 import { 
-  MonitorHeart,
-  Warning as WarningIcon,
-  Radar,
-  Timer
+  ArrowBack, 
+  MonitorHeart 
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import scanService from '../services/scanService';
 
 const RealTimeMonitor = () => {
   const navigate = useNavigate();
-  const [monitorData, setMonitorData] = useState([
-    { id: '1', patient: 'Ethan Carter', dose: 0.45, status: 'Normal', machine: 'CT-X1', color: '#38a169' },
-    { id: '2', patient: 'Sophia Miller', dose: 2.1, status: 'Warning', machine: 'CT-X2', color: '#ecc94b' },
-    { id: '3', patient: 'Jackson Reed', dose: 0.12, status: 'Normal', machine: 'CT-X1', color: '#3182ce' }
-  ]);
+  const [formData, setFormData] = useState({
+    patientName: '',
+    patientId: '',
+    requestingPhysician: '',
+    scanType: 'Head'
+  });
 
-  // Simulate real-time data updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setMonitorData(prev => prev.map(item => ({
-        ...item,
-        dose: +(item.dose + (Math.random() * 0.05 - 0.02)).toFixed(2)
-      })));
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState({ open: false, message: '', severity: 'success' });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleNext = async () => {
+    if (!formData.patientName || !formData.patientId || !formData.requestingPhysician) {
+      setFeedback({ open: true, message: 'Please fill all required fields.', severity: 'error' });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const payload = {
+        patient_name: formData.patientName,
+        patient_id: formData.patientId,
+        requesting_physician: formData.requestingPhysician,
+        scan_type: formData.scanType
+      };
+      await scanService.registerScan(payload);
+      setFeedback({ open: true, message: `Scan sequence for ${formData.patientName} initialized successfully!`, severity: 'success' });
+      setTimeout(() => navigate('/ai-risk', { state: { autoStart: true, patientId: formData.patientId } }), 2000);
+    } catch (err) {
+      setFeedback({ open: true, message: 'Failed to register scan. Please try again.', severity: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <Box sx={{ pb: 8 }}>
-      {/* Live Header */}
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 800, color: '#1a202c', mb: 0.5 }}>Active Sessions</Typography>
-          <Typography variant="body1" sx={{ color: '#a0aec0', fontWeight: 600 }}>3 scanners transmitting real-time data</Typography>
-        </Box>
-        <Chip 
-          icon={<Radar className="pulse-animation" />} 
-          label="LIVE MONITORING" 
-          sx={{ 
-            bgcolor: '#fed7d7', 
-            color: '#e53e3e', 
-            fontWeight: 800, 
-            px: 1, 
-            py: 2.5, 
-            borderRadius: '12px',
-            '& .MuiChip-icon': { color: 'inherit' }
-          }} 
-        />
+    <Box sx={{ maxWidth: 700, mx: 'auto', pb: 8 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 6 }}>
+        <IconButton onClick={() => navigate('/dashboard')} sx={{ color: '#0f172a' }}>
+          <ArrowBack />
+        </IconButton>
+        <Typography variant="h5" sx={{ fontWeight: 900, flexGrow: 1, textAlign: 'center', color: '#0f172a', letterSpacing: -0.5 }}>
+          New Scan Registration
+        </Typography>
       </Box>
 
-      <Grid container spacing={3}>
-        {monitorData.map((item) => (
-          <Grid item xs={12} key={item.id}>
-            <Paper 
-              onClick={() => navigate(`/patient/${item.id}`)}
+      <Paper className="glass-card" sx={{ p: 5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 5 }}>
+          <Box sx={{ p: 1.5, borderRadius: '16px', bgcolor: 'rgba(37, 99, 235, 0.08)', color: '#2563eb', border: '1px solid rgba(37, 99, 235, 0.1)' }}>
+            <MonitorHeart sx={{ fontSize: 32 }} />
+          </Box>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 800, color: '#0f172a' }}>Registration Portal</Typography>
+            <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 600 }}>Initialize medical imaging sequence</Typography>
+          </Box>
+        </Box>
+
+        <Stack spacing={4}>
+          <Box>
+            <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800, mb: 1.5, display: 'block', textTransform: 'uppercase', letterSpacing: 1.5 }}>
+              Patient ID *
+            </Typography>
+            <TextField
+              fullWidth
+              name="patientId"
+              value={formData.patientId}
+              onChange={handleChange}
+              variant="outlined"
+              placeholder="e.g. PT-12345"
               sx={{ 
-                p: 0, 
-                borderRadius: '24px', 
-                overflow: 'hidden', 
-                border: '1px solid #edf2f7',
-                bgcolor: 'white',
-                cursor: 'pointer',
-                transition: 'all 0.3s',
-                '&:hover': { 
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
-                  transform: 'translateY(-2px)',
-                  borderColor: '#0066ff'
-                }
+                '& .MuiOutlinedInput-root': { 
+                  borderRadius: '16px', 
+                  bgcolor: '#f8fafc',
+                  color: '#0f172a',
+                  mb: 2,
+                  '& fieldset': { borderColor: '#e2e8f0' },
+                  '&:hover fieldset': { borderColor: '#2563eb' },
+                } 
+              }}
+            />
+
+            <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800, mb: 1.5, display: 'block', textTransform: 'uppercase', letterSpacing: 1.5 }}>
+              Patient Name *
+            </Typography>
+            <TextField
+              fullWidth
+              name="patientName"
+              value={formData.patientName}
+              onChange={handleChange}
+              variant="outlined"
+              placeholder="e.g. Alex Johnson"
+              sx={{ 
+                '& .MuiOutlinedInput-root': { 
+                  borderRadius: '16px', 
+                  bgcolor: '#f8fafc',
+                  color: '#0f172a',
+                  mb: 2,
+                  '& fieldset': { borderColor: '#e2e8f0' },
+                  '&:hover fieldset': { borderColor: '#2563eb' },
+                } 
+              }}
+            />
+
+            <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800, mb: 1.5, display: 'block', textTransform: 'uppercase', letterSpacing: 1.5 }}>
+              Requesting Physician *
+            </Typography>
+            <TextField
+              fullWidth
+              name="requestingPhysician"
+              value={formData.requestingPhysician}
+              onChange={handleChange}
+              variant="outlined"
+              placeholder="e.g. Dr. Smith"
+              sx={{ 
+                '& .MuiOutlinedInput-root': { 
+                  borderRadius: '16px', 
+                  bgcolor: '#f8fafc',
+                  color: '#0f172a',
+                  '& fieldset': { borderColor: '#e2e8f0' },
+                  '&:hover fieldset': { borderColor: '#2563eb' },
+                } 
+              }}
+            />
+          </Box>
+
+          <Box>
+            <Typography variant="caption" sx={{ color: '#94a3b8', fontWeight: 800, mb: 1.5, display: 'block', textTransform: 'uppercase', letterSpacing: 1.5 }}>
+              Scan Type
+            </Typography>
+            <Stack direction="row" spacing={2}>
+              {['Head', 'Neck', 'Chest', 'Abdomen'].map((type) => (
+                <Button
+                  key={type}
+                  onClick={() => setFormData({...formData, scanType: type})}
+                  variant={formData.scanType === type ? 'contained' : 'outlined'}
+                  sx={{
+                    borderRadius: '12px',
+                    px: 3,
+                    py: 1,
+                    flex: 1,
+                    textTransform: 'none',
+                    fontWeight: 800,
+                    bgcolor: formData.scanType === type ? '#2563eb' : '#ffffff',
+                    color: formData.scanType === type ? 'white' : '#64748b',
+                    borderColor: formData.scanType === type ? '#2563eb' : '#e2e8f0',
+                    '&:hover': { bgcolor: formData.scanType === type ? '#1d4ed8' : '#f8fafc' }
+                  }}
+                >
+                  {type}
+                </Button>
+              ))}
+            </Stack>
+          </Box>
+
+          <Box sx={{ pt: 2 }}>
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={handleNext}
+              disabled={loading}
+              sx={{ 
+                py: 2, 
+                borderRadius: '16px', 
+                bgcolor: '#2563eb', 
+                fontWeight: 900, 
+                fontSize: '1rem',
+                textTransform: 'none',
+                boxShadow: '0 8px 30px rgba(37, 99, 235, 0.2)',
+                '&:hover': { bgcolor: '#1d4ed8' }
               }}
             >
-              <Box sx={{ p: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 3 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                  <Avatar 
-                    sx={{ 
-                      width: 64, 
-                      height: 64, 
-                      bgcolor: `${item.color}15`, 
-                      color: item.color,
-                      border: `2px solid ${item.color}30`
-                    }}
-                  >
-                    <MonitorHeart sx={{ fontSize: 32 }} />
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 800, color: '#1a202c' }}>{item.patient}</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5 }}>
-                      <Typography variant="caption" sx={{ color: '#a0aec0', fontWeight: 700, textTransform: 'uppercase' }}>Machine: {item.machine}</Typography>
-                      <Divider orientation="vertical" flexItem sx={{ height: 12, my: 'auto' }} />
-                      <Typography variant="caption" sx={{ color: '#a0aec0', fontWeight: 700, textTransform: 'uppercase' }}>Session: 14:02s</Typography>
-                    </Box>
-                  </Box>
-                </Box>
-                
-                <Box sx={{ textAlign: 'right', minWidth: 150 }}>
-                  <Typography variant="h3" sx={{ 
-                    fontWeight: 900, 
-                    color: item.status === 'Warning' ? '#ecc94b' : '#3182ce',
-                    display: 'flex',
-                    alignItems: 'baseline',
-                    justifyContent: 'flex-end',
-                    lineHeight: 1
-                  }}>
-                    {item.dose}
-                    <Typography variant="h6" component="span" sx={{ ml: 1, fontWeight: 700, opacity: 0.6 }}>mSv</Typography>
-                  </Typography>
-                  <Typography variant="caption" sx={{ color: '#a0aec0', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>Real-time absorption</Typography>
-                </Box>
-
-                <Box sx={{ width: '100%', mt: 1 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="caption" sx={{ fontWeight: 700, color: '#4a5568' }}>Dose Exposure Progress</Typography>
-                    <Typography variant="caption" sx={{ fontWeight: 800, color: item.color }}>{item.status.toUpperCase()}</Typography>
-                  </Box>
-                  <LinearProgress 
-                    variant="determinate" 
-                    value={Math.min((item.dose / 3) * 100, 100)} 
-                    sx={{ 
-                      height: 10, 
-                      borderRadius: 5, 
-                      bgcolor: '#edf2f7',
-                      '& .MuiLinearProgress-bar': {
-                        bgcolor: item.status === 'Warning' ? '#ecc94b' : item.color,
-                        borderRadius: 5
-                      }
-                    }}
-                  />
-                </Box>
-              </Box>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
-
-      <Paper sx={{ mt: 4, p: 4, borderRadius: '24px', textAlign: 'center', bgcolor: '#ebf8ff', border: '2px dashed #bee3f8' }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
-          <Timer sx={{ color: '#3182ce' }} />
-          <Typography variant="body1" sx={{ color: '#2b6cb0', fontWeight: 600 }}>
-            Waiting for incoming streams from Department B... Internal system sync in progress.
-          </Typography>
-        </Box>
+              {loading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : "Start Diagnostic Scan"}
+            </Button>
+          </Box>
+        </Stack>
       </Paper>
 
-      {/* Animation Styles */}
-      <style>
-        {`
-          @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.1); }
-            100% { opacity: 1; transform: scale(1); }
-          }
-          .pulse-animation {
-            animation: pulse 2s ease-in-out infinite;
-          }
-        `}
-      </style>
+      <Snackbar 
+        open={feedback.open} 
+        autoHideDuration={6000} 
+        onClose={() => setFeedback({ ...feedback, open: false })}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert severity={feedback.severity} variant="filled" sx={{ borderRadius: '12px', fontWeight: 700 }}>
+          {feedback.message}
+        </Alert>
+      </Snackbar>
+
+      {/* Helper Footer */}
+      <Box sx={{ mt: 4, textAlign: 'center' }}>
+        <Button 
+          startIcon={<MonitorHeart />}
+          onClick={() => alert("Legacy Live Monitoring view is coming soon!")}
+          sx={{ color: '#94a3b8', fontWeight: 700, textTransform: 'none', '&:hover': { color: '#0f172a' } }}
+        >
+          Access Live Monitoring
+        </Button>
+      </Box>
     </Box>
   );
 };

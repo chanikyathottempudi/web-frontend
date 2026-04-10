@@ -57,7 +57,7 @@ const Login = () => {
             <Avatar sx={{ width: 64, height: 64, bgcolor: '#ebf4ff', color: '#0066ff', mb: 2 }}>
               <HealthAndSafety fontSize="large" />
             </Avatar>
-            <Typography variant="h4" sx={{ fontWeight: 900, color: '#1a202c', letterSpacing: '-0.5px' }}>VentGuard</Typography>
+            <Typography variant="h4" sx={{ fontWeight: 900, color: '#1a202c', letterSpacing: '-0.5px' }}>CT DOSE</Typography>
             <Typography variant="body2" sx={{ color: '#a0aec0', fontWeight: 600, mt: 0.5 }}>Clinical Analytics Portal</Typography>
           </Box>
 
@@ -124,26 +124,26 @@ const Login = () => {
               sx={{ 
                 mt: 4, 
                 mb: 3, 
-                bgcolor: '#0066ff', 
+                bgcolor: '#2563eb', 
                 borderRadius: '14px',
                 py: 1.8,
                 textTransform: 'none',
                 fontWeight: 800,
                 fontSize: '1rem',
-                boxShadow: '0 8px 16px rgba(0, 102, 255, 0.2)'
+                boxShadow: '0 8px 16px rgba(37, 99, 235, 0.2)'
               }}
             >
               Access Secure Portal
             </Button>
           </Box>
 
-          <Typography variant="body2" sx={{ color: '#a0aec0', fontWeight: 600 }}>
+          <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 700 }}>
             Authorized Personnel Only. {' '}
             <Link 
               component="button"
               type="button"
               onClick={() => navigate('/signup')}
-              sx={{ color: '#0066ff', fontWeight: 800, textDecoration: 'none' }}
+              sx={{ color: '#2563eb', fontWeight: 800, textDecoration: 'none' }}
             >
               Request Access
             </Link>
